@@ -54,16 +54,16 @@
 \maketitle 
 
 \section{Περιγραφή dataset}
-Το dataset που χρησιμοποιήθηκε είναι το ChestMNIST της MedMNIST με μέγεθος εικόνων \datasetPicSize{}x\datasetPicSize{}.
-οι εικόνες είναι ασπρόμαυρες. Το dataset αποτελείται από συνολικά από \datasetPlithosEikonwn{} εικόνες. Χωρίζεται σε training,
+Το dataset που χρησιμοποιήθηκε είναι το ChestMNIST της MedMNIST. Το ChestMNIST είναι βασισμένο στο NIH-ChestXray14 dataset. 
+Αποτελείται από συνολικά από \datasetPlithosEikonwn{} ασπρόμαυρες εικόνες. Το μέγεθος των εικόνων είναι 
+$\datasetPicSize{}\times{}\datasetPicSize{}$ ενώ οι αρχικές εικόνες του NIH-ChestXray14 dataset είχαν μέγεθος 
+$1024\times{}1024$. Το dataset χωρίζεται σε training,
 validation και test splits. Στο training split ανήκουν \datasetTrainingPlithos{} εικόνες, δηλαδή το
 $\frac{\datasetTrainingPlithos{}}{\datasetPlithosEikonwn{}} = \trainingOverTotalPerc{}\%$ των συνολικών δεδομένων. 
 Στο validation split ανήκουν \datasetValidationPlithos{} εικόνες δηλαδή το 
 $\frac{\datasetValidationPlithos{}}{\datasetPlithosEikonwn{}} = 
 \validationOverTotalPerc{}\%$ των συνολικών δεδομένων. Στο test split ανήκουν \datasetTestPlithos{} εικόνες δηλαδή το 
-$\frac{\datasetTestPlithos{}}{\datasetPlithosEikonwn{}} = \testOverTotalPerc{}\%$ των συνολικών δεδομένων. Η ανισορροπία
-στα τρία splits παρατηρείται γιατί ένα το training ενός Deep Learning Network χρειάζεται πολλά παραπάνω δεδομένα για την
-εκπαίδευση από τα validation και test.
+$\frac{\datasetTestPlithos{}}{\datasetPlithosEikonwn{}} = \testOverTotalPerc{}\%$ των συνολικών δεδομένων. 
 
 Οι κλάσεις στις οποίες είναι χωρισμένο το dataset περιγράφουν κοινές παθήσεις στην περιοχή του θώρακα, είτε στους πνεύμονες
 ή στην καρδιά.  Ακολουθεί λίστα με τις κλάσεις και σύντομη περιγραφή της κάθε πάθησης, καθώς και πώς αυτή εμφανίζεται σε μια
@@ -119,33 +119,59 @@ $\frac{\datasetTestPlithos{}}{\datasetPlithosEikonwn{}} = \testOverTotalPerc{}\%
 \end{figure}
 
 Στον πίνακα~\ref{class_counts} υπάρχει ο αριθμός των εικόνων
-που ανήκει σε κάθε κλάση. Αξίζει να σημειωθεί ότι το ChestMNIST είναι multi-label dataset, δηλαδή μια εικόνα μπορεί να ανήκει
-σε παραπάνω από μια κλάσεις ταυτόχρονα και μερικές εικόνες μπορεί να μην ανήκουν και σε καμία κλάση. 
+που ανήκει σε κάθε κλάση. Φαίνεται ότι στην κλάση `hernia' ανήκουν πολύ λιγότερα δείγματα από τις υπόλοιπες (μόνο 227), ενώ 
+στις κλάσεις `infiltration', `effusion' και `atelectasis' ανήκουν πολύ περισσότερα δείγματα ($11535-19870$). Βλέπουμε ότι
+υπάρχει μεγάλη ανισορροπία στον αριθμό των δειγμάτων ανά κλάση και άρα αναμένουμε το δίκτυό μας να δυσκολευτεί με την σωστή πρόβλεψη
+της μειοψηφικής κλάσης. Αξίζει να σημειωθεί ότι το ChestMNIST είναι multi-label dataset, δηλαδή μια εικόνα μπορεί να ανήκει
+σε παραπάνω από μια κλάσεις ταυτόχρονα και μερικές εικόνες μπορεί να μην ανήκουν και σε καμία κλάση. Στον 
+πίνακα~\ref{auc_acc_various_models} φαίνονται οι επιδόσεις διαφόρων δημοφιλών μεθόδων στο dataset ChestMNIST. Περισσότερες
+πληροφορίες για το evaluation των MedMNIST datasets υπάρχουν στο αντίστοιχο \href{https://www.nature.com/articles/s41597-022-01721-8}{paper}.
+Βλέπουμε ότι όλα επιτυγχάνουν αρκετά υψηλό ACC (accuracy) και χαμηλότερο, αλλά ακόμα αποδεκτό AUC (Area Under the Curve). Το γεγονός
+ότι το AUC είναι χαμηλότερο από το ACC, ενώ το ACC είναι πολύ υψηλό οφείλεται στην ύπαρξη μειοψηφικών και πλειοψηφικών κλάσεων 
+με μεγάλες διαφορές μεταξύ τους. Σε μια τέτοια περίπτωση η μετρική AUC είναι πιο αξιόπιστη για την εκτίμηση της πραγματικής 
+επίδοσης της κάθε μεθόδου.
 
 \begin{table}
-    \label{class_counts}
     \centering
     \begin{tabular}{lc}
         \toprule
         Class Name & Number of occurrences \\
         \midrule
-        0 \hspace{1pt} 'atelectasis'         & 11535 \\
-        1 \hspace{1pt} 'cardiomegaly'        & 2772 \\
-        2 \hspace{1pt} 'effusion'        & 13307 \\
-        3 \hspace{1pt} 'infiltration     & 19870 \\
-        4 \hspace{1pt} 'mass'        & 5746 \\
-        5 \hspace{1pt} 'nodule'      & 6323 \\
-        6 \hspace{1pt} 'pneumonia'      & 1353 \\
-        7 \hspace{1pt} 'pneumothorax'   & 5298 \\
-        8 \hspace{1pt} 'consolidation'                & 4667 \\
-        9 \hspace{1pt} 'edema'                & 2303 \\
-        10 'emphysema'                & 2516 \\
-        11 'fibrosis'                & 1686 \\
-        12 'pleural'                & 3385 \\
-        13 'hernia'                & 227 \\
+        0 \hspace{1pt} `atelectasis'         & 11535 \\
+        1 \hspace{1pt} `cardiomegaly'        & 2772 \\
+        2 \hspace{1pt} `effusion'        & 13307 \\
+        3 \hspace{1pt} `infiltration'     & 19870 \\
+        4 \hspace{1pt} `mass'        & 5746 \\
+        5 \hspace{1pt} `nodule'      & 6323 \\
+        6 \hspace{1pt} `pneumonia'      & 1353 \\
+        7 \hspace{1pt} `pneumothorax'   & 5298 \\
+        8 \hspace{1pt} `consolidation'                & 4667 \\
+        9 \hspace{1pt} `edema'                & 2303 \\
+        10 `emphysema'                & 2516 \\
+        11 `fibrosis'                & 1686 \\
+        12 `pleural'                & 3385 \\
+        13 `hernia'                & 227 \\
         \bottomrule
     \end{tabular}
-    \caption{Αριθμός εμφανίσεων της κάθε κλάσης σε όλο το dataset (training και test)}
+    \caption{Αριθμός εμφανίσεων της κάθε κλάσης σε όλο το dataset (training και test)}\label{class_counts}
+\end{table}
+
+\begin{table}
+    \centering
+    \begin{tabular}{lcc}
+        \toprule
+        Method & AUC & ACC \\
+        \midrule
+        ResNet-18 (28) &0.768 &0.947  \\
+        ResNet-18 (224)& 0.773& 0.947 \\
+        ResNet-50 (28) &0.769 &0.947  \\
+        ResNet-50 (224)& 0.773& 0.948 \\
+        auto-sklearn11  & 0.649 & 0.779 \\
+        AutoKeras12 & 0.742 & 0.937 \\
+        Google AutoML Vision & 0.778 & 0.948 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Επιδόσεις διαφόρων δημοφιλών μεθόδων στο dataset ChestMNIST, στις μεθόδους ResNet χρησιμοποιήθηκε και μέγεθος φωτογραφίας $228\times{}228$, scaled από εικόνες $28\times{}28$}\label{auc_acc_various_models}
 \end{table}
 
 \section{Μάλλον κώδικας}
