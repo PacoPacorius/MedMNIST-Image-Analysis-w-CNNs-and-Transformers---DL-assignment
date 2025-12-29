@@ -137,20 +137,20 @@ $\frac{\datasetTestPlithos{}}{\datasetPlithosEikonwn{}} = \testOverTotalPerc{}\%
         \toprule
         Class Name & Number of occurrences \\
         \midrule
-        0 \hspace{1pt} `atelectasis'         & 11535 \\
-        1 \hspace{1pt} `cardiomegaly'        & 2772 \\
-        2 \hspace{1pt} `effusion'        & 13307 \\
-        3 \hspace{1pt} `infiltration'     & 19870 \\
-        4 \hspace{1pt} `mass'        & 5746 \\
-        5 \hspace{1pt} `nodule'      & 6323 \\
-        6 \hspace{1pt} `pneumonia'      & 1353 \\
-        7 \hspace{1pt} `pneumothorax'   & 5298 \\
-        8 \hspace{1pt} `consolidation'                & 4667 \\
-        9 \hspace{1pt} `edema'                & 2303 \\
-        10 `emphysema'                & 2516 \\
-        11 `fibrosis'                & 1686 \\
-        12 `pleural'                & 3385 \\
-        13 `hernia'                & 227 \\
+        0 \hspace{1pt} `atelectasis'   & 11535 \\
+        1 \hspace{1pt} `cardiomegaly'  & 2772  \\
+        2 \hspace{1pt} `effusion'      & 13307 \\
+        3 \hspace{1pt} `infiltration'  & 19870 \\
+        4 \hspace{1pt} `mass'          & 5746  \\
+        5 \hspace{1pt} `nodule'        & 6323  \\
+        6 \hspace{1pt} `pneumonia'     & 1353  \\
+        7 \hspace{1pt} `pneumothorax'  & 5298  \\
+        8 \hspace{1pt} `consolidation' & 4667  \\
+        9 \hspace{1pt} `edema'         & 2303  \\
+        10 `emphysema'                 & 2516  \\
+        11 `fibrosis'                  & 1686  \\
+        12 `pleural'                   & 3385  \\
+        13 `hernia'                    & 227   \\
         \bottomrule
     \end{tabular}
     \caption{Αριθμός εμφανίσεων της κάθε κλάσης σε όλο το dataset (training και test)}\label{class_counts}
@@ -162,20 +162,43 @@ $\frac{\datasetTestPlithos{}}{\datasetPlithosEikonwn{}} = \testOverTotalPerc{}\%
         \toprule
         Method & AUC & ACC \\
         \midrule
-        ResNet-18 (28) &0.768 &0.947  \\
-        ResNet-18 (224)& 0.773& 0.947 \\
-        ResNet-50 (28) &0.769 &0.947  \\
-        ResNet-50 (224)& 0.773& 0.948 \\
-        auto-sklearn11  & 0.649 & 0.779 \\
-        AutoKeras12 & 0.742 & 0.937 \\
-        Google AutoML Vision & 0.778 & 0.948 \\
+        ResNet-18 (28)       & 0.768 & 0.947  \\
+        ResNet-18 (224)      & 0.773 & 0.947  \\
+        ResNet-50 (28)       & 0.769 & 0.947  \\
+        ResNet-50 (224)      & 0.773 & 0.948  \\
+        auto-sklearn11       & 0.649 & 0.779  \\
+        AutoKeras12          & 0.742 & 0.937  \\
+        Google AutoML Vision & 0.778 & 0.948  \\
         \bottomrule
     \end{tabular}
     \caption{Επιδόσεις διαφόρων δημοφιλών μεθόδων στο dataset ChestMNIST, στις μεθόδους ResNet χρησιμοποιήθηκε και μέγεθος φωτογραφίας $228\times{}228$, scaled από εικόνες $28\times{}28$}\label{auc_acc_various_models}
 \end{table}
 
-\section{Μάλλον κώδικας}
-\lipsum{2}
+Ακολουθεί η ανάλυση του κώδικα.
+
+\section{Προεπεξεργασία dataset}
+Ο κώδικας της εργασίας υλοποιήθηκε στο περιβάλλον Google Colab.
+
+\begin{itemize}
+    \item Initialization of dataset, displaying dataset information
+    \item initialization of seeds
+    \item Training, validation, test split. Batches. Normalized versions.
+\end{itemize}
+\section{CNN from scratch}
+
+\begin{itemize}
+    \item CNN model αρχιτεκτονική
+    \item Hyperparameter combinations. Combinations που δεν έτρεξαν και γιατί (RIP)
+    \item Train, loop, validation functions. Main loop, αποθήκευση hyperparameter combinations και επιδόσεων.
+    \item Plotting training and validation history. Σύγκριση-εύρεση καλύτερου hyperparameter combination, test dataset run.
+    \item Συμπεράσματα για επίδοση hyperparameter combinations.
+\end{itemize}
+
+\section{Transfer Learning}
+\section{Small Vision Transformer}
+\section{Συμπεράσματα}
+
+
 
 %%% ΚΕΦΑΛΑΙΟ 2 - CNN FROM SCRATCH %%%
 %• Σχεδιάστε ένα CNN με τουλάχιστον 3 συνελικτικά blocks, κάθε block να περιλαμβάνει
