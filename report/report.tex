@@ -176,12 +176,19 @@ $\frac{\datasetTestPlithos{}}{\datasetPlithosEikonwn{}} = \testOverTotalPerc{}\%
 
 Ακολουθεί η ανάλυση του κώδικα.
 
-\section{Προεπεξεργασία dataset}
-Ο κώδικας της εργασίας υλοποιήθηκε στο περιβάλλον Google Colab. Για να υπάρχει αναπαραγωγιμότητα
+\section{CNN From Scratch}
+Ο κώδικας της εργασίας υλοποιήθηκε στο περιβάλλον Google Colab και ειναι χωρισμένος σε τρία διαφορετικά
+μέρη. Στον κώδικα του πρώτου μέρους γίνεται πρώτα μια προετοιμασία του dataset, μετά ορίζεται
+η αρχιτεκτονική του CNN και τέλος γίνεται το training, το validation το test και η παράθεση των αποτελεσμάτων. 
+
+\subsection{Προετοιμασία του Dataset}
+Ο κώδικας για την προετοιμασία του dataset είναι παρόμοιος και στα τρία μέρη.
+Για να υπάρχει αναπαραγωγιμότη\-τα
 θέτουμε manual seeds. Αρχικοποιούμε τα τρία splits του dataset
-ChestMNIST (train, validation, test) και τα αντίστοιχα dataloaders με batch size 64. Δεν κάνουμε
+ChestMNIST (train, validation, test) και τα αντίστοιχα dataloaders με batch size 64. Στο πρώτο μέρος
+δεν κάνουμε
 κανονικοποί\-ηση ακόμα γιατί όλα τα hyperparameter combinations θα δοκιμαστούν αργότερα με και χωρίς
-κανονικοποίηση της εισόδου. Από εδω είδαμε πόσες κλάσεις υπάρχουν και ποιά είναι τα ονόματά τους.  
+κανονικοποίηση της εισόδου. Ελέγχουμε πόσες κλάσεις υπάρχουν και ποιά είναι τα ονόματά τους.  
 Έπειτα γίνεται μέτρηση του πλήθους των εικόνων που ανήκουν σε κάθε κλάση. Ο υπολογισμός έγινε και 
 για ολόκληρο το dataset (και τα τρία split συγχωνευμένα) αλλά και μόνο για το training set. Για
 κάθε split του dataset σχηματίζουμε ένα array όπου για γραμμές έχει το label κάθε εικόνας και 
@@ -201,8 +208,9 @@ pixel και άρα είναι ασπρόμαυρη.
 αποκλίσεις και τις μέσες τιμές όλων των batches και διαιρούμε με τον συνολικό αριθμό των samples.
 
 
+\subsection{Αρχιτεκτονική του CNN}
+\subsection{Training, Validation, Testing και Αποτελέσματα}
 
-\section{CNN from scratch}
 
 \begin{itemize}
     \item CNN model αρχιτεκτονική
@@ -213,7 +221,14 @@ pixel και άρα είναι ασπρόμαυρη.
 \end{itemize}
 
 \section{Transfer Learning}
+\subsection{Προετοιμασία του Dataset}
+\subsection{Pre-Trained Μοντέλο}
+\subsection{Training, Validation, Testing και Αποτελέσματα}
+
 \section{Small Vision Transformer}
+\subsection{Προετοιμασία του Dataset}
+\subsection{DeiT-tiny Transformer}
+\subsection{Training, Validation, Testing και Αποτελέσματα}
 \section{Συμπεράσματα}
 
 
