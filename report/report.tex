@@ -352,7 +352,8 @@ accuracy και loss για τα τριάντα epochs για κάθε hyperpara
 γράφημα του καλύτερου hyperparameter combination ως παράδειγμα.
 
 \section{Συμπεράσματα}
-Dropout 0.2 κακό, 0.7 μέγιστο. Batchnorm καλύτερο από layernorm. Weight Decay 10^2 κακό. Κανονικοποίηση δεδομένων εισόδου κακή.
+Dropout 0.2 κακό, 0.7 μέγιστο. Batchnorm καλύτερο από layernorm. Weight Decay $10^2$ κακό. Κανονικοποίηση δεδομένων εισόδου 
+δεν έχει διαφορά και μερικές φορές έχει χειρότερη απόδοση.
 
 
 \begin{itemize}
@@ -374,6 +375,13 @@ Dropout 0.2 κακό, 0.7 μέγιστο. Batchnorm καλύτερο από laye
 \subsection{DeiT-tiny Transformer}
 \subsection{Training, Validation, Testing και Αποτελέσματα}
 \section{Συμπεράσματα}
+\subsection{Προτάσεις Βελτίωσης}
+\begin{itemize}
+    \item Περισσότερα hyperparameter combinations.
+    \item Αρχικοποίηση βαρών.
+    \item Επιλογή βέλτιστου μοντέλου με βάση το loss, όχι του accuracy, λόγω ανισορροπίας κλάσεων.
+    \item Data Augmentation στις κλάσεις με πολύ λιγότερα δείγματα με σκοπό την καταπολέμησης της ανισορροπίας.
+\end{itemize}
 
 
 
