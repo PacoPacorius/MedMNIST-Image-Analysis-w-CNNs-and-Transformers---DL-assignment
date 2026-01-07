@@ -213,7 +213,7 @@ ChestMNIST (train, validation, test) και τα αντίστοιχα dataloader
 κάθε split του dataset σχηματίζουμε ένα array όπου για γραμμές έχει το label κάθε εικόνας και 
 έπειτα προσθέτουμε κατακόρυφα. Εφόσον τα labels υποδεικνύονται με one-hot encoding, οι τελικοί 
 αριθμοί είναι το πλήθος των εικόνων που ανήκουν σε κάθε κλάση. Αυτή η μέθοδος μας διευκολύνει
-γιατί όπως προαναφέρθηκε έχουμε multi-class classification problem, δηλαδή μια εικόνα μπορεί να
+γιατί όπως προαναφέρθηκε έχουμε multi-label classification problem, δηλαδή μια εικόνα μπορεί να
 ανήκει σε παραπάνω από μια κλάσεις ή και σε καμία. Έπειτα επιβεβαιώνουμε ότι οι εικόνες 
 μας είναι ασπρόμαυρες. Παίρνουμε 
 το πρώτο στοιχείο του validation split (το οποίο δεν γίνεται shuffled, οπότε θα πρέπει να βλέπουμε
@@ -228,14 +228,14 @@ pixel και άρα είναι ασπρόμαυρη.
 
 
 \subsection{Αρχιτεκτονική του CNN}
-Στο πρώτο μέρος της εργασίας ορίζουμε ένα Συνελκτικό Νευρωνικό Δίκτυο (CNN) από την αρχή. Η 
-αρχιτεκτονική του έχει ως εξής. Αποτελείται από 3 συνελικτικά blocks, ένα dropout layer και
+Στο πρώτο μέρος της εργασίας ορίζουμε ένα Συνελικτικό Νευρωνικό Δίκτυο (CNN) από την αρχή. Η 
+αρχιτεκτο\-νική του έχει ως εξής. Αποτελείται από 3 συνελικτικά blocks, ένα dropout layer και
 ένα τελευταίο fully connected layer. Κάθε συνελικτικό block αποτελείται από μια συνέλιξη,
 ένα layer κανονικοποίησης με ReLU 
 συνάρτηση ενεργοποίησης και ένα max pooling layer. Το πρώτο convolutional layer έχει 
 32 εξόδους (άρα 32 βάρη, άρα 32 φίλτρα), το δεύτερο 64 εξόδους και το τρίτο 128. Όλα τα
 layers έχουν μέγεθος kernel 3x3, $stride=1$ και $padding=1$. Η επιλογή του $padding=1$ βασίστηκε 
-στο ότι, αν έιχαμε $padding=0$, σύμφωνα με τον τύπο.
+στο ότι, αν έιχαμε $padding=0$, σύμφωνα με τον τύπο.\label{architecture_CNN_from_scratch}
 
 \begin{equation}
     out\_dim = \frac{(in\_dim - krnl\_size + 2*padding)}{stride} + 1
@@ -291,13 +291,76 @@ dropout rate $0.2$, για αυτό και η τελευταία δεν χρησ
 
 
 \subsection{Training, Validation, Testing και Αποτελέσματα}
+Με τρόπο παρόμοιο που μας υποδείχθηκε στο εργαστήριο διαμορφώνεται ο κώδικας για το training, validation και
+testing. Οι συναρτήσεις train\_one\_epoch, evaluate\_model και test\_model όλες εκπαιδεύουν, επαληθεύουν και 
+τεστάρουν το μοντέλο αντίστοιχα για ένα μόνο epoch. 
+
+Όταν καλείται η συνάρτηση train\_one\_epoch, αρχικοποιούνται οι μεταβλητές που θα χρησιμοποιηθούν στον υπολογισμό
+του accuracy και του loss και ενεργοποιείται το train mode του μοντέλου. Τα δεδομένα εισόδου μετακινούνται στην 
+κατάλληλη συσκευή (CPU ή GPU), γίνεται το forward pass, υπολογίζεται το loss με το criterion BCEWithLogitsLoss (ορίζεται
+παρακάτω), υπολογίζονται τα gradients με το backward pass και ενημερώνονται τα βάρη του μοντέλου με τη χρήση Adam
+Optimizer (επίσης ορίζεται παρακάτω). Εφόσον έχουμε multi-label classification problem, ο υπολογισμός του accuracy
+είναι λίγο πιο περίπλοκος. Τις εξόδους του μοντέλου τις περνάμε από μια σιγμοειδή συνάρτηση, έτσι ώστε να μετατραπούν
+από logits σε πιθανότητες. Έτσι η έξοδος για μια εικόνα έχει $14$ πιθανότητες που υποδεικνύουν πόσο πιθανό
+είναι αυτή η εικόνα να ανήκει σε κάθε κλάση. θεωρούμε αυθαίρετα ότι αν η πιθανότητα μιας κλάσης είναι πάνω 
+από $0.5$, τότε η εικόνα ανήκει και σε αυτήν την κλάση. Μετατρέπουμε την πιθανότητα που ανήκει στο δίαστημα $\left[0,1\right]$
+σε $1.0$ (True), αν ανήκει στο $\left[0.5,1\right]$ και σε $0.0$ (False) αν ανήκει στο $\left[0, 0.5\right]$. Έτσι μπορούμε
+από εδώ και πέρα να υπολογίσουμε την ακρίβεια όπως θα την υπολογίζαμε σε ένα binary classification problem, διαιρόντας
+τον αριθμό σωστών προβλέψεων προς τον αριθμό συνολικών προβλέψεων. Για να υπολογίσουμε τη συνολική απώλεια, προσθέτουμε την απώλεια κάθε 
+batch στο running\_loss και αφού τελειώσει το training διαιρούμε το running\_loss με τον αριθμό των δειγμάτων στο 
+training dataset. Η συνάρτηση train\_one\_epoch επιστρέφει τη συνολική απώλεια και την ακρίβεια.
+
+Η συνάρτηση evaluate\_model είναι πολύ παρόμοια με την train\_one\_epoch. Οι μόνες διαφορές τις είναι ότι το μοντέλο
+μπαίνει σε λειτουργία evaluation και δεν γίνεται backprop του σφάλματος στο δίκτυο, ούτε καλείται ο Adam Optimizer για
+ανανέωση των βάρων του δικτύου. Ο υπολογισμός της απώλειας και της ακρίβειας γίνεται με τον ίδιο τρόπο.
+
+Η συνάρτηση test\_model με τη σειρά της μοιάζει με την evaluate\_model, αλλά διαφέρει στον υπολογισμό της ακρίβειας
+και στο ότι υπολογίζονται τα confusion matrices. Επειδή χρειάζεται να υπολογίσουμε τα confusion matrices πρέπει να
+κρατήσουμε τις πληροφορίες όλων των labels της εισόδου και όλων των labels που προέβλεψε το μοντέλο. Εφόσον έχουμε 
+όλα τα labels που προέβλεψε το μοντέλο μας έτοιμα, αρκεί να συγκρίνουμε τα all\_predictions και all\_labels arrays element-wise
+και να πάρουμε την μέση τιμή όλων των συγκρίσεων για να υπολογίσουμε το accuracy. Το array all\_predictions έχει ήδη μετατραπεί σε
+δυαδική πιθανότητα True ή False, όπως περιγράψαμε για την συνάρτηση train\_one\_epoch, πριν τη σύγκριση. Στον~\autoref{confusion_matrix}
+φαίνεται η δομή ενός confusion matrix. True Negatives αναφέρεται στις φορές που η πρόβλεψη είναι σωστή στο ότι μία εικόνα δεν ανήκει
+σε αυτήν την κλάση. Αντίστοιχα η τιμή του False Negatives είναι οι φορές που η πρόβλεψη είναι λάθος στο ότι δεν ανήκει η εικόνα
+στη συγκεκριμένη κλάση. Για τον υπολογισμό των confusion matrices συγκρίνουμε τις προβλέψεις του μοντέλου με τα πραγματικά labels για κάθε κλάση
+και προσθέτουμε $1$ στην αντίστοιχη κατηγορία σε κάθε σύγκριση. Η έξοδος της test\_model είναι το συνολικό accuracy και μια λίστα με 
+όλα τα confusion matrices.
+
+\begin{table}
+    \centering
+    \begin{tabular}{|cc|}
+            {True Negatives} & {False Positives} \\
+            {False Negatives} & {True Positives} \\
+    \end{tabular}
+    \caption{Confusion Matrix}\label{confusion_matrix}
+\end{table}
+
+Οι παραπάνω συναρτήσεις καλούνται για 30 φορές (30 epochs) για κάθε hyperparameter combination. Αν η αντίστοιχη υπερπαράμετρος είναι 
+ορισμένη κανονικοποιούνται τα δεδομένα της εισόδου με τα transformations που ορίστηκαν στην~\autoref{architecture_CNN_from_scratch}.
+Εδώ ορίζονται και ο optimizer να είναι Adam Optimizer και το loss function να είναι το BCELogitsWithLoss. Η επιλογή του loss function
+έγινε διότι η Binary Cross Entropy έχει την καλύτερη επίδοση σε multi-label classification problems. Για κάθε hyperparameter
+combination, κάθε φορά που το accuracy που υπολογίζεται από την evaluate model είναι μεγαλύτερο από το προηγούμενο μέγιστο, αποθηκεύεται
+η κατάσταση του μοντέλου. Εφόσον το μέγιστο accuracy μπορεί να επιτευχθεί πριν το τελευταίο epoch, αυτή είναι μια μορφή early stopping.
+Έπειτα αν αυτό το accuracy είναι μεγαλύτερο από τα accuracy των υπόλοιπων hyperparameter combinations, ο τωρινός συνδυασμός υπερπαραμέτρων
+αποθηκεύεται ως ο καλύτερος και ανακτάται η κατάσταση του μοντέλου όταν επιτεύχθηκε αυτό το accuracy. Για να είναι δυνατή η προβολή 
+των training και validation plots με accuracy και loss για τα 30 epochs, τα απαραίτητα δεδομένα αποθηκεύονται σε λίστες. 
+
+Αφότου δοκιμαστούν όλα τα hyperparameter combinations, φορτώνεται η κατάσταση του μοντέλου που πέτυχε το καλύτερο accuracy και
+ο αντίστοιχος συνδυασμός υπερπαραμέτρων. Αυτό το μοντέλο τρέχει μία φορά με είσοδο το test\_dataset, το οποίο ανάλογα με την 
+αντίστοιχη υπερπαράμετρο είτε θα κανονικοποιηθεί πρώτα είτε όχι. Τέλος, σχηματίζονται γραφικές παραστάσεις με τα training και validation 
+accuracy και loss για τα τριάντα epochs για κάθε hyperparameter που δοκιμάστηκε. Στην~\autoref{best_combination_plot} φαίνεται το 
+γράφημα του καλύτερου hyperparameter combination ως παράδειγμα.
+
+\section{Συμπεράσματα}
+Dropout 0.2 κακό, 0.7 μέγιστο. Batchnorm καλύτερο από layernorm. Weight Decay 10^2 κακό. Κανονικοποίηση δεδομένων εισόδου κακή.
 
 
 \begin{itemize}
     \item CNN model αρχιτεκτονική -done
     \item Hyperparameter combinations. Combinations που δεν έτρεξαν και γιατί (RIP) -done
-    \item Train, loop, validation functions. Main loop, αποθήκευση hyperparameter combinations και επιδόσεων.
-    \item Plotting training and validation history. Σύγκριση-εύρεση καλύτερου hyperparameter combination, test dataset run.
+    \item Train, loop, validation functions. -done
+    \item Main loop, αποθήκευση hyperparameter combinations και επιδόσεων. -done
+    \item Plotting training and validation history. Σύγκριση-εύρεση καλύτερου hyperparameter combination, test dataset run. -done
     \item Συμπεράσματα για επίδοση hyperparameter combinations.
 \end{itemize}
 
@@ -335,6 +398,21 @@ dropout rate $0.2$, για αυτό και η τελευταία δεν χρησ
 %• Υπολογίστε test accuracy και δημιουργήστε confusion matrix.
 %• Συγκρίνετε τα αποτελέσματα και σχολιάστε πώς οι διαφορετικές τεχνικές επηρεάζουν
 %την απόδοση και τη γενίκευση.
+
+%If your model performs worse with normalized data compared to non-normalized data (as you observed in some input_normalization: False combinations leading to better validation accuracy), it could mean a few things:
+
+%   The Model Doesn't Benefit: For your specific SimpleCNN architecture and the ChestMNIST dataset, perhaps the range of pixel values (0-1
+%   after ToTensor) is already sufficient, or the model is robust enough that further scaling (normalization with mean/std) doesn't provide a
+%   significant advantage, or even slightly hinders its learning by shifting the input distribution in a way that the network's initial weights
+%   aren't well-suited for. Convolutional layers can sometimes be relatively robust to the scale of input features within a reasonable range.  
+
+%   Dataset Characteristics: The distribution of pixel values in ChestMNIST might be such that ToTensor (which scales pixels to [0, 1]) is already
+%   the most beneficial preprocessing step, and further Normalize (scaling to mean 0, std 1) doesn't add value or might even create a less optimal
+%   input distribution for the specific model you've designed.   
+
+%   Other Hyperparameters: It's also possible that the other hyperparameters
+%   (learning rate, weight decay, normalization layers, dropout) are not optimally tuned to leverage the benefits of input normalization. A model
+%   that benefits from normalization might require different learning rates or other architectural choices.
 
 
 
