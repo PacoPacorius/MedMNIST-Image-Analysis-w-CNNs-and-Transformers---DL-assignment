@@ -197,8 +197,9 @@ $\frac{\datasetTestPlithos{}}{\datasetPlithosEikonwn{}} = \testOverTotalPerc{}\%
 
 \section{CNN From Scratch}
 Ο κώδικας της εργασίας υλοποιήθηκε στο περιβάλλον Google Colab και ειναι χωρισμένος σε τρία διαφορετικά
-μέρη. Στον κώδικα του πρώτου μέρους γίνεται πρώτα μια προετοιμασία του dataset, μετά ορίζεται
-η αρχιτεκτονική του CNN και τέλος γίνεται το training, το validation το test και η παράθεση των αποτελεσμάτων. 
+μέρη. Στον κώδικα του πρώτου μέρους καλούμαστε να υλοποιήσουμε ένα CNN δικής μας αρχιτεκτονικής και
+να το εκπαιδεύσουμε εμείς. Σε αυτή την εργασία γίνεται πρώτα μια προετοιμασία του dataset, μετά ορίζεται
+η αρχιτεκτονική του CNN, γίνεται το training και το validation, το test του καλύτερου μοντέλου και τέλος η παράθεση των αποτελεσμάτων. 
 
 \subsection{Προετοιμασία του Dataset}
 Ο κώδικας για την προετοιμασία του dataset είναι παρόμοιος και στα τρία μέρη.
@@ -352,7 +353,7 @@ accuracy και loss για τα τριάντα epochs για κάθε hyperpara
 
 \section{Συμπεράσματα}
 Ο συνδυασμός με την καλύτερη επίδοση ήταν αυτός με batch normalization, καθόλου dropout και weight decay $10^3$, learning rate $10^4$ 
-και με input normalizationα. Αυτός ο συνδυασμός πέτυχε 0.9496 validation accuracy στο 25ο epoch και 0.9477 accuracy στο test
+και με input normalizationα. Αυτός ο συνδυασμός πέτυχε 0.9496 validation accuracy, 0.1602 validation loss στο 25ο epoch και 0.9477 accuracy στο test
 dataset, αριθμοί ικανοποιητικά υψηλοί εκ πρώτης όψεως. Μπορούμε να πούμε με αυτό το υψηλό test accuracy ότι με αυτές τις υπερπαραμέτρους
 το μοντέλο μας γενίκευσε την πληροφορία που έμαθε γενικά καλά. Στην~\autoref{best_combination_plot} 
 φαίνεται το γράφημα με την ακρίβεια και την απώλεια αυτού του συνδυασμού. Στον~\autoref{confusion_matrices} υπάρχουν τα confusion matrices 
@@ -565,14 +566,21 @@ confusion matrices, μας δείχνει ότι η ανισορροπία τω�
     \label{bad_training}
 \end{figure}
 
-
+\textbf{TODO}:
 \begin{itemize}
     \item σύγκριση input normalization και όχι input normalization. Νέος καλύτερος συνδυασμός υπερπαραμέτρων χωρίς input normalization.
 \end{itemize}
 
 \section{Transfer Learning}
+Στο δεύτερο μέρος της εργασίας καλούμαστε να χρησιμοποιήσουμε ένα pre-trained model και να εξετάσουμε πότε αξίζει να κάνουμε feature extraction και πότε 
+fine-tuning. Για αυτό τον σκοπό επιλέχθηκε το μοντέλο MobileNetV2 λόγω της μικρών υπολογιστικών απαιτήσεών του.
+
 \subsection{Προετοιμασία του Dataset}
-\subsection{Pre-Trained Μοντέλο}
+Ο κώδικας για την προετοιμασία του dataset, ορισμού seeds για αναπαραγωγιμότητα και των συναρτήσεων train\_one\_epoch, evaluate\_model και test\_model παραμένει επί το πλείστον ο ίδιος με τον κώδικα του πρώτου μέρους.
+Η μόνη διαφορά είναι στο ότι οι εικόνες της εισόδου μετατρέπονται από ασπρόμαυρες σε `έγχρωμες', δηλαδή αντί για ένα κανάλι φωτεινότητας κάθε εικόνα έχει τρία κανάλια. Αυτό 
+είναι απαίτηση του μοντέλου που επιλέξαμε καθώς περιμένει έγχρωμες εικόνες στην είσοδό του. Το batch size εξακολουθεί να είναι 64.
+
+\subsection{Περιγραφή Pre-Trained Μοντέλου}
 \subsection{Training, Validation, Testing και Αποτελέσματα}
 
 \section{Small Vision Transformer}
@@ -581,6 +589,7 @@ confusion matrices, μας δείχνει ότι η ανισορροπία τω�
 \subsection{Training, Validation, Testing και Αποτελέσματα}
 \section{Συμπεράσματα}
 \subsection{Προτάσεις Βελτίωσης}
+Part1:
 \begin{itemize}
     \item Περισσότερα hyperparameter combinations.
     \item Αρχικοποίηση βαρών.
@@ -588,6 +597,10 @@ confusion matrices, μας δείχνει ότι η ανισορροπία τω�
     \item Data Augmentation στις κλάσεις με πολύ λιγότερα δείγματα με σκοπό την καταπολέμησης της ανισορροπίας.
 \end{itemize}
 
+Part2:
+\begin{itemize}
+    \item Χρήση pre-trained μοντέλο με καλύτερη επίδοση σε πιο περίπλοκα προβλήματα (VGG16, ResNet18), εφόσον υπάρχουν οι πόροι.
+\end{itemize}
 
 
 %%% ΚΕΦΑΛΑΙΟ 2 - CNN FROM SCRATCH %%%
