@@ -54,7 +54,7 @@
 
 \setmainfont{CMU Serif}
 %\setmainfont{FreeSans}
-%\newfontfamily\greekfonttt[Script=Greek]{FreeMono Bold}[SizeFeatures={Size=9}] 
+\newfontfamily\greekfonttt[Script=Greek]{FreeMono Bold}[SizeFeatures={Size=9}] 
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{1em}
@@ -540,7 +540,7 @@ confusion matrices, μας δείχνει ότι η ανισορροπία τω�
     \vspace{1em}
 
     % --- Row 6 ---
-    \begin{minipage}{0.3\textwidth}
+    \begin{minipage}{\textwidth}
         \centering
         \caption*{Δείγμα Confusion Matrix για ευκολία}
         \begin{tabular}{| c | c |}
@@ -559,7 +559,7 @@ confusion matrices, μας δείχνει ότι η ανισορροπία τω�
 να έκανε overfitting στα δεδομένα του training dataset με τον συγκεκριμένο συνδυασμό υπερπαραμέτρων και να μην μπορούσε να γενικεύσει σε άλλη είσοδο.
 Από αυτό συμπεραίνουμε ότι η επιλογή των σωστών υπερπαραμέτρων είναι πολύ σημαντική και επηρεάζει την επίδοση του μοντέλου μας. Τέλος, η κανονικοποίηση εισόδου
 δεν επηρέασε ιδιαίτερα την επίδοση του μοντέλου. Στο~\autoref{best_hyper_comb_no_input_norm} φαίνεται ο καλύτερος συνδυασμός υπερπαραμέτρων χωρίς κανονικοποίηση, 
-ο οποίος πέτυχε 0.9495 validation accuracy και 0.1609 validation loss στο epoch 28, αριθμοί πολύ ανταγωνιστικοί σε σχέση με τον καλύτερο συνδυασμό υπερπαραμέτρων 
+ο οποίος πέτυχε 0.9495 validation accuracy και 0.1609 validation loss στο epoch 28, αριθμοί πολύ ανταγωνιστικοί σε σχέση με τον καλύτερο συνδυασμό υπερπαραμέ\-τρων 
 με κανονικοποίηση εισόδου (και γενικά) ο οποίος είχε 0.9496 validation accuracy και 0.1602 validation loss. 
 
 
@@ -825,78 +825,302 @@ classifier head. Σε αυτή τη μορφή το μοντέλο εκπαιδ�
 
 
 \section{Small Vision Transformer}
+Στο τρίτο και τελευταίο μέρος της εργασίας καλούμαστε να χρησιμοποιήσουμε έναν pre-trained Vision Transfor\-mer. Ο transformer που 
+χρησιμοποιήθηκε είναι ο DeiT-tiny.
+
 \subsection{Προετοιμασία του Dataset}
-\subsection{DeiT-tiny Transformer}
-\subsection{Training, Validation, Testing και Αποτελέσματα}
-\section{Συμπεράσματα}
-\subsection{Προτάσεις Βελτίωσης}
-Part1:
+Η προετοιμασία δεδομένων είναι πολύ παρόμοια με την προετοιμασία για το δεύτερο μέρος. Η πιο σημασντική διαφορά είναι ότι ο DeiT-tiny, εκτός από
+έγχρωμες εικόνες, αναμένει εικόνες εισόδου μεγέθους $224\times{}224$. Για αυτό λόγο χρειάστηκε να κάνουμε resize τις εικόνες του ChestMNIST dataset. 
+Επίσης ο transformer εκπαιδεύτηκε με συγκεκριμένη κανονικοποίηση στα δεδομένα
+εισόδου, με διαφορετική μέση τιμή και τυπική απόκλιση για κάθε κανάλι χρώματος. Αυτή την κανονικοποίηση χρησιμοποιήσαμε και εμείς στα δικά μας
+δεδομένα εισόδου. 
+
+
+
+\subsection{Training, Validation, Testing}
+Με παρόμοιο τρόπο με το δεύτερο μέρος, πρώτα κάνουμε feature extraction στον transformer, χρησιμοποιώντας learning rate $10^3$, batch size $32$ και
+εκπαιδεύοντας το νέο classifier head για $15$ epochs. Έπειτα ξεπαγώνουμε τα δύο τελευταία layers του transformer, αλλάζουμε σε batch size $16$ και
+συνεχίζουμε την εκπαίδευση του μοντέλου για άλλα $10$ epochs.
+
+\subsection{Αποτελέσματα και Συμπεράσματα}
+Στο~\autoref{transformer_plot} βλέπουμε τα αποτελέσματα του feature extraction και του fine tuning. Όσον αφορά το feature extraction, το validation 
+accuracy αρχικά αυξάνει και πολύ γρήγορα σταθεροποιείται. Αντίστοιχα το validation loss αρχικά μειώνεται και σύντομα σταθεροποιείται. Συνεπώς ο
+transformer πολύ γρήγορα προσαρμόστηκε στο δικό μας πρόβλημα μετά το pre-training. Η γρήγορη σύγκλιση του transformer στη φάση feature extraction 
+οφείλεται στα δυνατά pre-trained features (το DeiT-tiny εκπαιδεύτηκε στο ImageNet). Στη φάση fine tuning αρχικά βλέπουμε παρόμοια συμπεριφορά, 
+αρχική αύξηση του validation accuracy και μείωση του validation loss. Όσο πλησιάζουμε στο τέλος του fine tuning training βλέπουμε ότι το 
+validation accuracy αρχίζει να πέφτει και το validation loss να αρχίσει να ανεβαίνει, ενώ τα training accuracy και loss συνεχίζουν την πορεία
+τους και υποδεικνύουν ότι το μοντέλο συνεχίζει να βελτιώνει την επίδοσή του στο training dataset. Πιθανώς ο transformer να είχε αρχίσει να κάνει
+overfitting στο training dataset σε εκείνο το σημείο.
+
+\begin{figure}
+    \includegraphics[width=0.9\linewidth]{images/transformer_plot.png}
+    \caption{Plots transformer για training και validation. Fine Tuning ξεκίνησε μετά το epoch 15.}\label{transformer_plot}
+\end{figure}
+
+Ο transformer πέτυχε test accuracy 0.9454. Παρατηρώντας τα confusion matrices στον~\autoref{transformer_confusion_matrices}, μπορούμε να δούμε
+ότι η ανισορροπία των κλάσεων πάλι επηρέασε αρνητικά την επίδοση του μοντέλου μας. Ειδικά στις πιο μειονοτικές κλάσεις παθήσεων όπως `pneumonia' και
+`consolidation', βλέπουμε τα ίδια προβλήματα που παρατηρήσαμε στα προηγούμενα δύο μέρη τις εργασίας, πολύ υψηλά ποσοστά True και False Negatives και 
+μηδενικά, ή σχεδόν μηδενικά True Positives. Παρατηρούμε δηλαδή τη συντηριτικότητα του μοντέλου να προβλέψει τις ίδιες παθήσεις και την προτίμησή του
+να προβλέπει την απώλεια παθήσεων. Παρόλα αυτά σε κλάσεις με μεγαλύτερο αριθμό δειγμάτων όπως `effusion' και `infiltration' βλέπουμε ότι υπάρχουν 
+περισσότεροι αριθμοί True Positives, δηλαδή το μοντέλο μας κατάφερε να ανιχνεύσει τις ασθένειες αρκετές φορές. Σε σχέση με τα False Negatives όμως
+οι αριθμοί αυτοί παραμένουν μικροί. Παρόλα αυτά, αυτό είναι μια βελτίωση από τα προηγούμενα δύο μοντέλα.
+\begin{table}
+    \centering
+    \caption{Transformer Confusion Matrices για όλες τις κλάσεις.}\label{transformer_confusion_matrices}
+    
+    % --- Row 1 ---
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \caption*{Κλάση 'atelectasis' (0)}
+        \begin{tabular}{| c | c |}
+            \hline
+            19842 & 171 \\ \hline
+            2326 & 94 \\ \hline
+        \end{tabular}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \caption*{Κλάση 'cardiomegaly' (1)}
+        \begin{tabular}{| c | c |}
+            \hline
+            21760 & 91 \\ \hline
+            545 & 37 \\ \hline
+        \end{tabular}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \caption*{Κλάση 'effusion' (2)}
+        \begin{tabular}{| c | c |}
+            \hline
+            18868 & 811 \\ \hline
+            2081 & 673 \\ \hline
+        \end{tabular}
+    \end{minipage}
+
+    \vspace{1em}
+
+    % --- Row 2 ---
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \caption*{Κλάση 'infiltration' (3)}
+        \begin{tabular}{| c | c |}
+            \hline
+            18112 & 383 \\ \hline
+            3659 & 279 \\ \hline
+        \end{tabular}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \caption*{Κλάση 'mass' (4)}
+        \begin{tabular}{| c | c |}
+            \hline
+            21158 & 142 \\ \hline
+            1075 & 58 \\ \hline
+        \end{tabular}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \caption*{Κλάση 'nodule' (5)}
+        \begin{tabular}{| c | c |}
+            \hline
+            21061 & 37 \\ \hline
+            1332 & 3 \\ \hline
+        \end{tabular}
+    \end{minipage}
+
+    \vspace{1em}
+
+    % --- Row 3 ---
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \caption*{Κλάση 'pneumonia' (6)}
+        \begin{tabular}{| c | c |}
+            \hline
+            22191 & 0 \\ \hline
+            242 & 0 \\ \hline
+        \end{tabular}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \caption*{Κλάση 'pneumothorax' (7)}
+        \begin{tabular}{| c | c |}
+            \hline
+            21247 & 97 \\ \hline
+            1053 & 36 \\ \hline
+        \end{tabular}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \caption*{Κλάση 'consolidation' (8)}
+        \begin{tabular}{| c | c |}
+            \hline
+            21441 & 35 \\ \hline
+            952 & 5 \\ \hline
+        \end{tabular}
+    \end{minipage}
+
+    \vspace{1em}
+
+    % --- Row 4 ---
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \caption*{Κλάση 'edema' (9)}
+        \begin{tabular}{| c | c |}
+            \hline
+            21993 & 27 \\ \hline
+            406 & 7 \\ \hline
+        \end{tabular}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \caption*{Κλάση 'emphysema' (10)}
+        \begin{tabular}{| c | c |}
+            \hline
+            21890 & 34 \\ \hline
+            505 & 4 \\ \hline
+        \end{tabular}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \caption*{Κλάση 'fibrosis' (11)}
+        \begin{tabular}{| c | c |}
+            \hline
+            22068 & 3 \\ \hline
+            362 & 0 \\ \hline
+        \end{tabular}
+    \end{minipage}
+
+    \vspace{1em}
+
+    % --- Row 5 ---
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \caption*{Κλάση 'pleural' (12)}
+        \begin{tabular}{| c | c |}
+            \hline
+            21685 & 14 \\ \hline
+            732 & 2 \\ \hline
+        \end{tabular}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \caption*{Κλάση 'hernia' (13)}
+        \begin{tabular}{| c | c |}
+            \hline
+            22391 & 0 \\ \hline
+            42 & 0 \\ \hline
+        \end{tabular}
+    \end{minipage}
+
+    \vspace{1em}
+
+    % --- Row 6 ---
+    \begin{minipage}{\textwidth}
+        \centering
+        \caption*{Δείγμα Confusion Matrix για ευκολία}
+        \begin{tabular}{| c | c |}
+            \hline
+            True Negative & False Positive \\ \hline
+            False Negative & True Positive \\ \hline
+        \end{tabular}
+    \end{minipage}
+\end{table}
+
+Σαν τελικά συμπεράσματα όλων των αποτελεσμάτων ως τώρα, μπορούμε να συμπαράνουμε τα εξής. Τα CNN from scratch έχουν τη δυσκολία ότι η αρχιτεκτονική τους πρέπει να σχεδιαστεί από την αρχή. Η σύγκλισή τους
+είναι αργή εφόσον εκπαιδεύονται from scratch και η επίδοσή τους εξαρτάται σε μεγάλο βαθμό από την επιλογή βέλτιστων υπερπαραμέτρων, η εύρεση των οποίων απαιτεί χρονοβόρο πειραματισμό. Για να
+πετύχουν επιδόσεις ανταγωνιστικές των pre-trained μοντέλων είναι απαραίτητη η ύπαρξη πολύ μεγάλου training dataset, αλλιώς υπάρχει αυξημένος κίνδυνος overfitting. Στο ChestMNIST dataset, 
+λόγω της ύπαρξης μεγάλης ανισορροπίας κλάσεων και περιορισμένου αριθμού δειγμάτων, η επίδοση του CNN from scratch δεν ήταν καλή, όπως είδαμε από τα confusion matrices του test dataset.
+Οι pre-trained transformers έχουν γρήγορη σύγκλιση και στο feature extraction και στο fine tuning λόγω των pre-trained features τους. Η γενίκευσή τους είναι καλή, εφόσον έχουν 
+εκπαιδευτεί σε επαρκώς μεγάλο dataset. Στο δικό μας πρόβλημα, ο DeiT-tiny δυσκολεύτηκε μεν, λόγω της ανισορροπίας κλάσεων, να γενικεύσει καλά, αλλα σίγουρα είχε καλύτερη γενίκευση από τo 
+CNN from scratch και το transfer learning CNN. Τέλος, το CNN με transfer learning (MobileNetV2) στο δικό μας πρόβλημα είχε παρόμοια γενίκευση με το CNN from scratch, παρόλο που 
+το pre-training του έγινε στο ImageNet, το ίδιο dataset με το DeiT-tiny. Πιθανώς η αρχιτεκτονική του MobileNetV2 να μην είναι ταιριαστή στο δικό μας πρόβλημα και να ήταν 
+ιδιαίτερα ευαίσθητη στην ανισορροπία κλάσεων του ChestMNIST. Παρόλα αυτά, σε σχέση με το CNN from scratch, η σύγκλισή του ήταν ταχύτερη.
+
+\subsection{Αρχιτεκτονική DeiT-tiny Transformer}
+
+Ο DeiT-tiny (Data-efficient Image Transformer - Tiny) είναι μια παραλλαγή του Vision
+Transformer (ViT), σχεδιασμένη να λειτουργεί αποτελεσματικά χωρίς τα τεράστια
+pre-training datasets που συνήθως απαιτούν οι transformers. Κύρια χαρακτηριστικά της αρχιτεκτονικής
+τους είναι τα εξής. Οι εικόνες εισόδου μεγέθους $224\times224$ χωρίζονται σε σταθερού μεγέθους patches $16\times16$ τα οποία 
+γίνονται flatten και προβάλλονται γραμμικά σε διανύσματα
+embedding σταθερού μήκους (patch tokens). $196$ patch tokens 
+προστίθενται μετά από ένα class token, το οποίο είναι ένα learnable διάνυσμα που προσπαθεί να
+προβλέψει την κλάση στην οποία ανήκει η εικόνα εισόδου, το ground truth. 
+
+Στο τέλος αυτού του sequence από tokens
+προστίθεται το distillation token, χαρακτη\-ριστικό της αρχιτεκτονικής DeiT. Αυτό είναι
+learnable και αλληλεπιδρά με όλα τα υπόλοιπα tokens στη σειρά για να εκπαιδευτεί από
+ένα teacher μοντέλο (συνήθως CNN). Αυτό το token ουσιαστικά προσπαθεί να μαντέψει την πρόβλεψη του CNN για την 
+εικόνα εισόδου. Η χρήση του teacher CNN και του distillation token κατά τη διάρκεια της εκπαίδευσης επιτρέπει στο μοντέλο να 
+επωφεληθεί από τα inductive biases (όπως η αμεταβλητότητα στη μετατόπιση, ή translation
+invariance) που είναι εγγενείς στα συνελικτικά επίπεδα και να `κληρονομήσει' τη χωρική αντίληψη ενός CNN. Αυτό το γεγονός το βοηθά
+να γενικεύει καλύτερα όταν τα δεδομένα είναι περιορισμένα, καθώς δεν χρειάζεται να μάθει θεμελιώδη αξιώματα χωρικής συσχέτισης στις εικόνες από έξτρα δεδομένα. 
+Για αυτό το λόγο, σε αντίθεση με τα αρχικά ViTs που απαιτούν εκατοντάδες εκατομμύρια εικόνες, το DeiT-tiny μπορεί να επιτύχει
+ανταγωνιστικά αποτελέσματα χρησιμοποιώντας μικρότερου μεγέθους datasets. Παρόλα αυτά, η χρήση του distillation token πολλές φορές
+δεν είναι αρκετή και εξαιρετικά μικρά ή εξειδικευμένα σύνολα δεδομένων ενδέχεται να δυσκολέψουν το DeiT να μάθει την τοπική
+δομή όσο αποτελεσματικά όσο ένα απλό CNN. 
+
+Επειδή οι transformers δεν έχουν αντίληψη της χωρικής σειράς, προστίθενται 
+absolute positional embeddings σε κάθε ένα από τα $198$ συνολικά token της σειράς, με σκοπό τη διατήρηση
+της χωρικής πληροφορίας πριν από την επεξεργασία. Αυτή είναι η είσοδος του transformer encoder, ο οποίος χρησιμοποιεί
+μηχανισμούς self-attention για τον υπολογισμό των global σχέσεων μεταξύ όλων των tokens. Η έκδοση 
+"tiny" χρησιμοποιεί συγκεκριμένα $12$ layers με $3$ attention heads και embedding διανύσματα με διάσταση $192$.  
+
+Στο πλαίσιο των vision transformers το self-attention είναι ένας μηχανισμός που επιτρέπει σε κάθε patch ενός sequence να
+`κοιτάει' όλα τα υπόλοιπα patch της ίδιας εικόνας ταυτόχρονα, έτσι ώστε να εντοπίσει ποιά patch είναι σημαντικά για τη 
+δική του αναπαράσταση. Ένα attention-head είναι ένα ανεξάρτητο instance self-attention. Οι transformers χρησιμοποιούν 
+Multi-Head Attention (MHA), το οποίο τρέχει πολλά attention heads παράλληλα. Κάθε attention head εκπαιδεύεται να
+εστιάζει σε διαφορετικές πτυχές των δεδομένων (τοπικές ακμές, υφές, κλπ). Οι έξοδοι των attention heads 
+κατατάσσονται σε μια σειρά και περνάνε από το τελικό γραμμικό layer. Αυτή είναι και η έξοδος του transformer block.
+
+Το DeiT-tiny είναι εξαιρετικά αποδοτικό και απαιτεί σημαντικά λιγότερους υπολογιστικούς
+πόρους και χρόνο εκπαίδευσης σε σχέση με τα μεγαλύτερα μοντέλα transformer, εφόσον αποτελείται από περίπου $5.7$ εκατομμύρια παραμέτρους μόνο.
+Για σύγκριση, το DeiT-small αποτελείται από $22$ εκατομμύρια παραμέτρους και το DeiT-base από $86$ εκατομμύρια παραμέτρους. Παρόλα αυτά, είναι ακόμα
+απαιτητικό σε υπολογιστικούς πόρους σε σχέση με ένα CNN. Επίσης, παρά το σχετικά μικρό μέγεθός του, ο DeiT-tiny είναι επιρρεπής σε over-fitting σε μικρά σύνολα δεδομένων.
+Τέλος, η απόδοσή του μπορεί να μειωθεί σημαντικά αν η εικόνες εισόδου έχουν διαφορετικές διαστάσεις από $224\times{}224$.
+
+
+\section{Προτάσεις Βελτίωσης}
+Με βάση τα παραπάνω, υπάρχουν αρκετές κατευθύνσεις για μελλοντική επέκταση της εργασίας. Ανεξαρτήτως από τις μεθόδους που χρησιμοποιήθηκαν:
 \begin{itemize}
-    \item Περισσότερα hyperparameter combinations.
-    \item Αρχικοποίηση βαρών.
-    \item Επιλογή βέλτιστου συνδυασμού υπερπαραμέτρων με βάση μετρικές όπως AUC και F1 score, όχι του accuracy, λόγω ανισορροπίας κλάσεων.
-    \item Data Augmentation στις κλάσεις με πολύ λιγότερα δείγματα με σκοπό την καταπολέμησης της ανισορροπί\-ας.
-    \item Weighted Loss: Implement a weighted BCEWithLogitsLoss where classes with fewer positive samples (which are most of the diseases here) 
-        are given a higher weight. This forces the model to pay more attention to correctly classifying these underrepresented positive cases.
-    \item Threshold Optimization: The current model uses a fixed threshold of 0.5 for torch.sigmoid(outputs) > 0.5. Experiment with optimizing this 
-        threshold per class on the validation set. A lower threshold might increase recall for positive cases.
+    \item \textbf{Weighted Loss Function:} Η υλοποίηση μιας συνάρτησης απώλειας με βάρη που θα ευνοούν μεινοτικές κλάσεις (που είναι η πλειοψηφία των κλάσεων
+        με πάθηση) θα ωθούσε το μοντέλο να προβλέπει και τις ίδιες τις παθήσεις, αντί να προβλέπει μόνο την απώλειά τους.
+    \item \textbf{Βελτιστοποίηση Κατωφλίου Απόφασης:} Ο πειραματισμός με το σταθερό κατώφλι της σιγμοει\-δούς συνάρτησης που μετατρέπει τα logits σε
+        δυαδική πιθανότητα \verb|torch.sigmoid(outputs) > 0.5| μπορεί να βοηθήσει στην ανίχνευση των παθήσεων.
+    \item \textbf{Αντιμετώπιση Ανισορροπίας Κλάσεων:} Στις μειονοτικές κλάσεις θα μπορούσε να χρησιμοποι\-ηθεί data agumentation, ή κάποιου άλλου είδους oversampling
+        ενώ στις πλειοψηφικές κλάσεις θα μπο\-ρούσε να χρησιμοποιηθεί undersampling, για την καταπολέμηση της ανισορροπίας των κλάσεων στο ίδιο το dataset.
 \end{itemize}
 
-Part2:
+Προτάσεις βελτίωσης για την υλοποίηση του CNN με εκπαίδευση από την αρχή:
 \begin{itemize}
-    \item Data Augmentation στις κλάσεις με πολύ λιγότερα δείγματα με σκοπό την καταπολέμησης της ανισορροπί\-ας.
-    \item Χρήση pre-trained μοντέλο με καλύτερη επίδοση σε πιο περίπλοκα προβλήματα (VGG16, ResNet18), εφόσον υπάρχουν οι πόροι.
-    \item Weighted Loss: Implement a weighted BCEWithLogitsLoss where classes with fewer positive samples (which are most of the diseases here) 
-        are given a higher weight. This forces the model to pay more attention to correctly classifying these underrepresented positive cases.
-    \item Threshold Optimization: The current model uses a fixed threshold of 0.5 for torch.sigmoid(outputs) > 0.5. Experiment with optimizing this 
-        threshold per class on the validation set. A lower threshold might increase recall for positive cases.
+    \item \textbf{Επιλογή βέλτιστων υπερπαραμέτρων με άλλη μετρική:} Επιλογή βέλτιστου συνδυασμού υπερπαραμέτρων με βάση μετρικές όπως F1 score, 
+        όχι του accuracy, λόγω ανισορροπίας κλάσεων, πιθανώς να μας έδινε δαφορετική εικόνα για το ποιός συνδυασμός παραμέτρων είναι ο
+        κατάλληλος για το παρών προόβλημα.
+    \item \textbf{Δοκιμές περισσότερων συνδυασμών υπερπαραμέτρων:} Σε συνδυασμό με το παραπάνω, υπερπαράμετροι που αποκλείστηκαν όπως μερικές
+        τιμές των weight decay και dropout, καθώς και η κανονικοποίηση σε επίπεδο layer καλό θα ήταν να επαναφερθούν στις δοκιμές.
 \end{itemize}
 
+Προτάσεις βελτίωσης για transfer learning και feature extraction σε CNN και σε vision transformer:
+\begin{itemize}
+    \item \textbf{Δοκιμή διαφορετικού pre-trained μοντέλου}: Χρήση pre-trained μοντέλου με καλύτερη επίδοση σε πιο περίπλοκα προβλήματα 
+        (VGG16, ResNet18, DeiT-small), εφόσον υπάρχουν οι πόροι.
+    \item \textbf{Κανονικοποίση εισόδου με βάση στατιστικά της εισόδου:} Σε αντίθεση με το τρίτο μέρος, στο δεύτερο δεν χρησιμοποιήθηκαν
+        τα στατιστικά χαρακτηριστικά του ImageNet για την κανονικο\-ποί\-ηση της εισόδου, αλλά σταθερές υπερπαράμετροι. Ίσως η 
+        αλλαγή της κανονικοποίησης εισόδου όπως είναι στο τρίτο μέρος να βοηθούσε την επίδοση του μοντέλου.
+    \item \textbf{Χρήση εικόνων με μεγαλύτερη ανάλυση:} Η αρχική ανάλυση των εικόνων $28\times{}28$ είναι πολύ μικρή σε σχέση με το $16\times{}16$ patch 
+        του DeiT-tiny. Παρόλο που μεγενθύναμε τις φωτογραφίες στο μέγεθος για το οποίο έχει βελτιστοποιηθεί ο DeiT-tiny, υπάρχει περίπτωση να 
+        είχαμε περισσότερη πληροφορία που θα ήταν χρήσιμη στην ανίχνευση των παθήσεων αν οι εικόνες του dataset είχαν μεγαλύτερη αρχική ανάλυση.
+\end{itemize}
 
-%%% ΚΕΦΑΛΑΙΟ 2 - CNN FROM SCRATCH %%%
-%• Σχεδιάστε ένα CNN με τουλάχιστον 3 συνελικτικά blocks, κάθε block να περιλαμβάνει
-%Conv2d → ReLU → MaxPooling2d. Προτείνεται να ξεκινήσετε με 32, 64 και 128 φίλτρα
-%αντίστοιχα, kernel size 3×3. 
-%• Προσθέστε ένα fully connected layer στο τέλος με αριθμό νευρώνων ίσο με τον αριθμό
-%των κλάσεων.
-%• Πειραματιστείτε με Batch Normalization μετά από κάθε Conv2d και/ή Layer
-%Normalization στο τέλος κάθε block.
-%• Δοκιμάστε Dropout στο fully connected layer με ποσοστά, 0.2, 0.5 και 0.7.
-%• Χρησιμοποιήστε Weight Decay (L2 regularization) με τιμές 1e-4, 1e-3 και 1e-2.
-%• Χρησιμοποιήστε Adam optimizer, με learning rate ενδεικτικά 1e-3, αλλά μπορείτε να
-%πειραματιστείτε με τιμές μεταξύ 1e-4 και 5e-3.
-%    o Χωρίς normalization ή dropout: 1e-3
-%    o Με BatchNorm ή LayerNorm: 5e-4
-%    o Με Dropout ή Weight Decay: 1e-3 ή 1e-4 ανάλογα με το συνδυασμό τεχνικών
-%• Batch size: 64, Epochs: 30–50.
-%• Παρακολουθήστε training και validation curves (loss & accuracy) για κάθε συνδυασμό
-%τεχνικών.
-%• Υπολογίστε test accuracy και δημιουργήστε confusion matrix.
-%• Συγκρίνετε τα αποτελέσματα και σχολιάστε πώς οι διαφορετικές τεχνικές επηρεάζουν
-%την απόδοση και τη γενίκευση.
-
-%If your model performs worse with normalized data compared to non-normalized data (as you observed in some input_normalization: False combinations leading to better validation accuracy), it could mean a few things:
-
-%   The Model Doesn't Benefit: For your specific SimpleCNN architecture and the ChestMNIST dataset, perhaps the range of pixel values (0-1
-%   after ToTensor) is already sufficient, or the model is robust enough that further scaling (normalization with mean/std) doesn't provide a
-%   significant advantage, or even slightly hinders its learning by shifting the input distribution in a way that the network's initial weights
-%   aren't well-suited for. Convolutional layers can sometimes be relatively robust to the scale of input features within a reasonable range.  
-
-%   Dataset Characteristics: The distribution of pixel values in ChestMNIST might be such that ToTensor (which scales pixels to [0, 1]) is already
-%   the most beneficial preprocessing step, and further Normalize (scaling to mean 0, std 1) doesn't add value or might even create a less optimal
-%   input distribution for the specific model you've designed.   
-
-%   Other Hyperparameters: It's also possible that the other hyperparameters
-%   (learning rate, weight decay, normalization layers, dropout) are not optimally tuned to leverage the benefits of input normalization. A model
-%   that benefits from normalization might require different learning rates or other architectural choices.
-
-
-
-%%% ΚΕΦΑΛΑΙΟ 1 - ΠΕΡΙΓΡΑΦΗ ΤΟΥ DATASET %%%
-%• Περιγράψτε τον τύπο των εικόνων (π.χ. grayscale ή RGB) και την ανάλυση (π.χ. 28×28 ή 32×32). - done
-%• Αναφέρετε τον αριθμό των κλάσεων και τη σημασία τους (π.χ. τύποι όγκων, κατηγορίες ιστών, κλπ.). - done
-%• Καταγράψτε το μέγεθος του dataset (train/test/validation splits) και αν υπάρχει ανισορροπία στις κλάσεις. - done, να περιγράψω τον τρόπο με τον οποίο βρήκα των αριθμό των εικόνων σε κάθε κλάση;
-%• Συμπεριλάβετε μερικά παραδείγματα εικόνων. - done, μήπως να βάλω παράδεγμα μια εικόνα που ανήκει σε κάθε κλάση;
 
 \vspace{3em}
 \centering
